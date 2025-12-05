@@ -9,7 +9,8 @@
 </template>
 
 <script setup>
-import {computed} from "vue";
+import { computed } from "vue";
+import { line } from "@/components/scene/line.constructor";
 
 const props = defineProps({
   relation: {
@@ -26,7 +27,6 @@ const path = computed(() => {
   const padding = 50;
   const { x: fx, y: fy } = props.relation.from;
   const { x: tx, y: ty } = props.relation.to;
-  const pos = props.relation.connectPoint;
 
   const dx = tx - fx;
   const dy = ty - fy;
@@ -213,6 +213,9 @@ const path = computed(() => {
     case 'middle_bottom_top_left':
     case 'right_bottom_top_left':
     case 'middle_middle_top_left':
+    case 'left_top_bottom_left':
+    case 'middle_top_bottom_left':
+    case 'right_top_bottom_left':
       arrow.drawY(cy)
           .drawX(Math.min(dx - padding, 0))
           .drawY(cy)
@@ -229,10 +232,83 @@ const path = computed(() => {
     case 'middle_bottom_top_right':
     case 'left_bottom_top_right':
     case 'middle_middle_top_right':
+    case 'right_top_bottom_right':
+    case 'middle_top_bottom_right':
+    case 'left_top_bottom_right':
       arrow.drawY(cy)
           .drawX(Math.max(dx + padding, 0))
           .drawY(cy)
           .drawX(Math.min(dx, -padding))
+      break;
+    case 'left_top_left_bottom':
+    case 'left_middle_left_bottom':
+    case 'middle_top_left_bottom':
+      arrow.drawX(-padding)
+          .drawY(dy + padding)
+          .drawX(dx + padding)
+          .drawY(-padding)
+      break;
+    case 'left_bottom_left_bottom':
+    case 'middle_bottom_left_bottom':
+    case 'right_bottom_left_bottom':
+      arrow.drawX(Math.min(dx, -padding))
+          .drawY(cy)
+          .drawX(Math.max(dx + padding, 0))
+          .drawY(cy)
+          break;
+    case 'right_top_left_bottom':
+    case 'right_middle_left_bottom':
+    case 'middle_middle_left_bottom':
+    case 'left_top_right_bottom':
+    case 'left_middle_right_bottom':
+    case 'middle_middle_right_bottom':
+      arrow.drawX(cx)
+          .drawY(dy + padding)
+          .drawX(cx)
+          .drawY(-padding)
+      break
+    case 'right_top_right_bottom':
+    case 'right_middle_right_bottom':
+    case 'middle_top_right_bottom':
+      arrow.drawX(padding)
+          .drawY(dy + padding)
+          .drawX(dx - padding)
+          .drawY(-padding)
+      break;
+    case 'left_bottom_right_bottom':
+    case 'right_bottom_right_bottom':
+    case 'middle_bottom_right_bottom':
+      arrow.drawX(Math.max(dx, padding))
+          .drawY(cy)
+          .drawX(Math.min(dx - padding, 0))
+          .drawY(cy)
+      break;
+    case 'left_bottom_bottom_right':
+    case 'middle_bottom_bottom_right':
+    case 'left_middle_bottom_right':
+      arrow.drawY(padding)
+          .drawX(dx + padding)
+          .drawY(dy - padding)
+          .drawX(-padding)
+      break;
+    case 'right_bottom_bottom_right':
+    case 'right_middle_bottom_right':
+    case 'middle_middle_bottom_right':
+    case 'left_middle_bottom_left':
+    case 'left_bottom_bottom_left':
+    case 'middle_middle_bottom_left':
+      arrow.drawY(Math.max(dy, padding))
+          .drawX(cx)
+          .drawY(Math.min( dy - padding, 0))
+          .drawX(cx)
+      break;
+    case 'right_middle_bottom_left':
+    case 'right_bottom_bottom_left':
+    case 'middle_bottom_bottom_left':
+      arrow.drawY(padding)
+          .drawX(dx - padding)
+          .drawY(dy - padding)
+          .drawX(padding)
       break;
     default:
       break;
@@ -240,78 +316,4 @@ const path = computed(() => {
 
   return arrow.build();
 })
-
-function line(start) {
-  const r = 10;
-  const points = [{ ...start }]
-
-  function last() {
-    return points[points.length - 1]
-  }
-
-  function drawX(dx) {
-    if (dx === 0) return this
-    const p = last()
-    points.push({ x: p.x + dx, y: p.y })
-    return this
-  }
-
-  function drawY(dy) {
-    if (dy === 0) return this
-    const p = last()
-    points.push({ x: p.x, y: p.y + dy })
-    return this
-  }
-
-  function build() {
-    if (points.length < 2) return ''
-
-    let d = `M ${points[0].x} ${points[0].y}`
-
-    for (let i = 1; i < points.length; i++) {
-      const prev = points[i - 1]
-      const curr = points[i]
-      const next = points[i + 1]
-
-      // Последний сегмент — без скругления
-      if (!next) {
-        d += ` L ${curr.x} ${curr.y}`
-        continue
-      }
-
-      const dx1 = curr.x - prev.x
-      const dy1 = curr.y - prev.y
-      const dx2 = next.x - curr.x
-      const dy2 = next.y - curr.y
-
-      const len1 = Math.abs(dx1 + dy1)
-      const len2 = Math.abs(dx2 + dy2)
-
-      const rr = Math.min(r, len1 / 2, len2 / 2)
-
-      // Точка входа в скругление
-      const x1 = curr.x - Math.sign(dx1) * rr
-      const y1 = curr.y - Math.sign(dy1) * rr
-
-      // Точка выхода из скругления
-      const x2 = curr.x + Math.sign(dx2) * rr
-      const y2 = curr.y + Math.sign(dy2) * rr
-
-      d += ` L ${x1} ${y1}`
-      d += ` Q ${curr.x} ${curr.y} ${x2} ${y2}`
-    }
-
-    return d
-  }
-
-  return {
-    drawX,
-    drawY,
-    build,
-  }
-}
 </script>
-
-<style scoped>
-
-</style>

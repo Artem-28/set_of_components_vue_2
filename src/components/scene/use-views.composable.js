@@ -2,21 +2,21 @@ const value = [
     // { from: 'right', to: 'left' }, //ok
     // { from: 'right', to: 'top' }, // ok
     // { from: 'right', to: 'right' }, //ok
-    { from: 'right', to: 'bottom' },
+    // { from: 'right', to: 'bottom' },
 
     { from: 'bottom', to: 'left' },
     // { from: 'bottom', to: 'top' }, //ok
-    { from: 'bottom', to: 'right' },
+    // { from: 'bottom', to: 'right' },
     // { from: 'bottom', to: 'bottom' },
 
     // { from: 'left', to: 'left' }, // ok
     // { from: 'left', to: 'top' }, // ok
     // { from: 'left', to: 'right' }, //ok
-    { from: 'left', to: 'bottom' },
+    // { from: 'left', to: 'bottom' },
 
     // { from: 'top', to: 'left' },
     // { from: 'top', to: 'top' },
-    { from: 'top', to: 'right' },
+    // { from: 'top', to: 'right' },
     // { from: 'top', to: 'bottom' }
 ]
 
@@ -106,7 +106,8 @@ export const useViews = () => {
     }
 
     function get(direction) {
-        return  { from: 'top', to: 'right' }
+        // return { from: 'top', to: 'left'}
+        return  { from: 'bottom', to: 'left' }
         // const list = views[direction] || [];
         // if (list.length === 0) return null;
         // return list[list.length - 1]
