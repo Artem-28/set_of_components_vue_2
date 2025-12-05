@@ -1,18 +1,111 @@
 <template>
   <div class="page">
-    <scene />
+    <scene>
+      <constructor-block
+          v-for="b in nodes"
+          :key="b.id"
+          :block="b"
+      />
+    </scene>
   </div>
 </template>
 
 <script setup>
-import Scene from "@/components/scene/scene-v6.vue";
+import Scene from "@/components/scene/scene.vue";
+import {computed, ref} from "vue";
+import ConstructorBlock from "@/components/constructor-block.vue";
+
+const nodes = ref([
+  {
+    id: "b_a",
+    label: "A",
+    x: 600,
+    y: 300,
+    buttons: [
+      { id: 'b_a_1',  next_block_id: 'b_b' },
+      { id: 'b_a_2',  next_block_id: 'b_c' },
+      { id: 'b_a_3',  next_block_id: 'b_d' }
+    ]
+  },
+  {
+    id: "b_b",
+    label: "B",
+    x: 1200,
+    y: 500,
+  },
+  {
+    id: "b_c",
+    label: "C",
+    x: -100,
+    y: 700,
+  },
+  {
+    id: "b_d",
+    label: "D",
+    x: 200,
+    y: 900,
+    buttons: [
+      { id: 'b_d_1',  next_block_id: 'b_b' },
+    ]
+  }
+])
+
+const blocks = computed(() => {
+  const data = [];
+
+
+
+  const blockA = {
+    id: "a",
+    label: "A",
+    x: 0,
+    y: 0,
+    buttons: [
+      // { id: 'b_a_1', label: 'Переход к блоку B', next_block_id: 'button_b_b_1' },
+      // { id: 'b_a_2', label: 'Переход к блоку E', next_block_id: 'button_b_b_1' },
+    ]
+  }
+
+  const count = 1;
+
+  for (let i = 0; i < count; i++) {
+    blockA.buttons.push({
+      id: `b_a_${i}`,
+      label: `Переход к Блоку ${i}`,
+      next_block_id: `b_${i}`,
+    })
+
+    data.push({
+      id: `b_${i}`,
+      label: `Блок ${i}`,
+      x: 450,
+      y: (i + 1) * 150 + 20,
+      next_block_id: `c_${i}`,
+    })
+
+    data.push({
+      id: `c_${i}`,
+      label: `Блок C ${i}`,
+      x: 800,
+      // y: i * 150 + 20,
+      y: (i + 1) * 150 + 20,
+    })
+
+
+  }
+
+
+  // data.push(blockA)
+  return data;
+})
 </script>
 
 <style scoped lang="scss">
 .page {
   width: 100%;
   height: 100%;
-  padding: 10px;
+  padding: 20px;
+  background-color: black;
 }
 </style>
 

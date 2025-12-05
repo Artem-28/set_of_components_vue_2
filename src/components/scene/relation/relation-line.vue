@@ -10,7 +10,7 @@
 
 <script setup>
 import { computed } from "vue";
-import { line } from "@/components/scene/line.constructor";
+import { line } from "@/components/scene/relation/line.constructor";
 
 const props = defineProps({
   relation: {

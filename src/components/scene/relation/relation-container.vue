@@ -1,9 +1,5 @@
 <template>
   <div ref="rootRef" class="relation-container">
-    <div v-if="true" class="info">
-      <span v-text="`X: ${blockPosition.x}`" />
-      <span v-text="`Y: ${blockPosition.y}`" />
-    </div>
     <slot />
   </div>
 </template>
@@ -11,7 +7,6 @@
 <script setup>
 
 import {computed, inject, onMounted, ref } from "vue";
-import {useViews} from "@/components/scene/use-views.composable";
 
 const props = defineProps({
   connectKey: {
@@ -34,20 +29,19 @@ const props = defineProps({
 
 const scene = inject('_scene_', {})
 const block = inject('_block_', {});
-const fromPoints = {
+const fromSocket = {
   left: true,
   top: true,
   right: true,
   bottom: true,
-};
-const toPoints = {
-  left: true,
-  top: true,
-  right: true,
-  bottom: true,
-};
+}
 
-const view = useViews();
+const toSocket = {
+  left: true,
+  top: true,
+  right: true,
+  bottom: true,
+};
 
 let connection = null;
 const rootRect = { x: 0, y: 0, width: 0, height: 0 };
@@ -130,16 +124,15 @@ const relation = computed(() => {
 
   const pos = blockPosition.value;
   const direction = `${pos.x}_${pos.y}`;
-  const point = view.get(direction);
 
-  if (!point) return null;
+  const point = find(from, to);
+
+  if (!point.from || !point.to) return null;
 
   return {
-    connectPoint: point,
-    from: from[point.from],
-    to: to[point.to],
-    position: pos,
-    view: `${direction}_${point.from}_${point.to}`
+    from: point.from,
+    to: point.to,
+    view: `${direction}_${point.direction}`
   }
 })
 
@@ -172,8 +165,8 @@ function initializeConnectionPoints() {
     })
   }
 
-  execute(fromPoints, props.excludeFrom);
-  execute(toPoints, props.excludeTo);
+  execute(fromSocket, props.excludeFrom);
+  execute(toSocket, props.excludeTo);
 }
 
 async function initialize() {
@@ -188,6 +181,7 @@ async function initialize() {
   scene.saveConnection(props.connectKey, {
     block: block.key,
     rect: { ... rootRect },
+    socket: toSocket,
   });
 
   if (!props.to) return;
@@ -195,6 +189,46 @@ async function initialize() {
   connection = await scene.getConnection(props.to);
   related.value = true;
   createRelation();
+}
+
+function find(fPoints, tPoints) {
+  const keys = ["left", "top", "right", "bottom"];
+
+  let minDist = Infinity;
+
+  const best = {
+    from: null,
+    to: null,
+    direction: '',
+  };
+
+  const execute = (fKey) => {
+    for (const tKey of keys) {
+      if (connection.socket[tKey] !== true) continue;
+
+      const fp = fPoints[fKey];
+      const tp = tPoints[tKey];
+
+      const dx = tp.x - fp.x;
+      const dy = tp.y - fp.y;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist < minDist) {
+        minDist = dist;
+
+        best.from = fp;
+        best.to = tp;
+        best.direction = `${fKey}_${tKey}`
+      }
+    }
+  }
+
+  for (const key of keys) {
+    if (fromSocket[key] !== true) continue;
+    execute(key)
+  }
+
+  return best;
 }
 
 onMounted(() => {

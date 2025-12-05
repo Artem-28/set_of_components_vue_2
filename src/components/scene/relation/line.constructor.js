@@ -1,5 +1,5 @@
 export function line(start) {
-    const r = 10;
+    const r = 100;
     const points = [{ ...start }]
 
     function last() {

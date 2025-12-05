@@ -10,14 +10,9 @@ const routes = [
     component: () => import('../views/IndexPage.vue')
   },
   {
-    path: '/scene-test',
-    name: 'scene-test',
-    component: () => import('../views/scene-page.vue')
-  },
-  {
     path: '/scene',
     name: 'scene',
-    component: () => import('../views/scene-page-v2.vue')
+    component: () => import('../views/scene-page.vue')
   },
   {
     path: '/svg',

@@ -1,34 +1,50 @@
 <template>
   <block :block="block" block-key="id">
-    <relation-container
-        :connect-key="block.id"
-        :to="block.next_block_id"
-        class="constructor-block"
-        :exclude-from="[]"
-    >
-      <span class="constructor-block__label" v-text="block.label" />
+    <div class="brick">
+      <relation-container
+          :connect-key="block.id"
+          exclude-from
+          :exclude-to="['bottom']"
+          class="brick__to-connect"
+      />
+      <relation-container
+          v-for="b in block.buttons"
+          :connect-key="b.id"
+          :to="b.next_block_id"
+          :exclude-from="['top']"
+          class="brick__from-connect"
+      />
+      <span v-text="block.label" />
+    </div>
+<!--    <relation-container-->
+<!--        :connect-key="block.id"-->
+<!--        :to="block.next_block_id"-->
+<!--        class="constructor-block"-->
+<!--        :exclude-from="[]"-->
+<!--    >-->
+<!--      <span class="constructor-block__label" v-text="block.label" />-->
 
-      <div
-          v-if="block.buttons"
-          class="constructor-block__actions"
-      >
-        <relation-container
-            v-for="b in block.buttons"
-            :key="b.id"
-            :connect-key="b.id"
-            :to="b.next_block_id"
-            class="constructor-block__connect"
-        >
-          <div class="constructor-block__action" v-text="b.label" />
-        </relation-container>
-      </div>
-    </relation-container>
+<!--      <div-->
+<!--          v-if="block.buttons"-->
+<!--          class="constructor-block__actions"-->
+<!--      >-->
+<!--        <relation-container-->
+<!--            v-for="b in block.buttons"-->
+<!--            :key="b.id"-->
+<!--            :connect-key="b.id"-->
+<!--            :to="b.next_block_id"-->
+<!--            class="constructor-block__connect"-->
+<!--        >-->
+<!--          <div class="constructor-block__action" v-text="b.label" />-->
+<!--        </relation-container>-->
+<!--      </div>-->
+<!--    </relation-container>-->
   </block>
 </template>
 
 <script setup>
 import Block from "@/components/scene/block";
-import RelationContainer from "@/components/scene/relation-container";
+import RelationContainer from "@/components/scene/relation/relation-container";
 
 const props = defineProps({
   block: {
@@ -39,6 +55,31 @@ const props = defineProps({
 </script>
 
 <style scoped lang="scss">
+.brick {
+  position: relative;
+  width: 200px;
+  height: 100px;
+  border: 1px solid white;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: black;
+  &__to-connect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+  }
+  &__from-connect {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 50%;
+  }
+}
 .constructor-block {
   display: flex;
   align-items: center;

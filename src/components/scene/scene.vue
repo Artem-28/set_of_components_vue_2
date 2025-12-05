@@ -37,7 +37,7 @@
 
 <script setup>
 import { computed, ref, provide, onMounted } from "vue";
-import RelationLine from "@/components/scene/relation-line";
+import RelationLine from "@/components/scene/relation/relation-line";
 import { useStorage } from "@/composable";
 
 const config = {
