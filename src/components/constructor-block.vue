@@ -14,31 +14,12 @@
           :exclude-from="['top']"
           class="brick__from-connect"
       />
+      <relation-container
+          :exclude-from="['top']"
+          class="brick__from-connect"
+      />
       <span v-text="block.label" />
     </div>
-<!--    <relation-container-->
-<!--        :connect-key="block.id"-->
-<!--        :to="block.next_block_id"-->
-<!--        class="constructor-block"-->
-<!--        :exclude-from="[]"-->
-<!--    >-->
-<!--      <span class="constructor-block__label" v-text="block.label" />-->
-
-<!--      <div-->
-<!--          v-if="block.buttons"-->
-<!--          class="constructor-block__actions"-->
-<!--      >-->
-<!--        <relation-container-->
-<!--            v-for="b in block.buttons"-->
-<!--            :key="b.id"-->
-<!--            :connect-key="b.id"-->
-<!--            :to="b.next_block_id"-->
-<!--            class="constructor-block__connect"-->
-<!--        >-->
-<!--          <div class="constructor-block__action" v-text="b.label" />-->
-<!--        </relation-container>-->
-<!--      </div>-->
-<!--    </relation-container>-->
   </block>
 </template>
 

@@ -311,6 +311,7 @@ const path = computed(() => {
           .drawX(padding)
       break;
     default:
+      arrow.draw(dx, dy);
       break;
   }
 

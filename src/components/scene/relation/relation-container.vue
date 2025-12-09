@@ -1,5 +1,11 @@
 <template>
   <div ref="rootRef" class="relation-container">
+    <div
+        v-for="s in sockets"
+        :key="s.type"
+        :class="s.css"
+        @pointerdown.stop="(e) => startConnection(e, s)"
+    />
     <slot />
   </div>
 </template>
@@ -11,7 +17,7 @@ import {computed, inject, onMounted, ref } from "vue";
 const props = defineProps({
   connectKey: {
     type: [Number, String],
-    required: true,
+    required: false,
   },
   to: {
     type: [Number, String],
@@ -29,12 +35,12 @@ const props = defineProps({
 
 const scene = inject('_scene_', {})
 const block = inject('_block_', {});
-const fromSocket = {
+const fromSocket = ref({
   left: true,
   top: true,
   right: true,
   bottom: true,
-}
+})
 
 const toSocket = {
   left: true,
@@ -50,8 +56,6 @@ const related = ref(false);
 const rootRef = ref(null);
 
 const fromRect = computed(() => {
-  if (!related.value) return null;
-
   const { x: blockX, y: blockY } = block.position.value;
 
   const offsetX = rootRect.x - block.rect.value.x;
@@ -122,18 +126,37 @@ const relation = computed(() => {
   const { from, to } = points.value;
   if (!from || !to) return null;
 
-  const pos = blockPosition.value;
-  const direction = `${pos.x}_${pos.y}`;
-
   const point = find(from, to);
 
   if (!point.from || !point.to) return null;
 
+  const pos = blockPosition.value;
+
+  const view = `${pos.x}_${pos.y}_${point.fromSocket}_${point.toSocket}`
+
   return {
     from: point.from,
     to: point.to,
-    view: `${direction}_${point.direction}`
+    fromSocket: point.fromSocket,
+    toSocket: point.toSocket,
+    view,
   }
+})
+
+const sockets = computed(() => {
+  const data = [];
+
+  ['left', 'top', 'right', 'bottom'].forEach(key => {
+    const enable = fromSocket.value[key];
+    if (!enable) return;
+    const active = relation.value?.fromSocket === key;
+    let css = `relation-container__socket socket--${key}`;
+    if (active) css += ' socket--active';
+
+    data.push({ type: key, active, css })
+  })
+
+  return data;
 })
 
 function calculatePoints(rect) {
@@ -145,6 +168,15 @@ function calculatePoints(rect) {
     right: { x: rect.x + rect.width, y: rect.y + centerH },
     bottom: { x: rect.x + centerW, y: rect.y + rect.height },
   };
+}
+
+function startConnection(e, s) {
+  if (!fromRect.value) return;
+
+  const points = calculatePoints(fromRect.value)
+  const point = { ...points[s.type], cx: e.clientX, cy: e.clientY }
+
+  scene.startConnection({ point });
 }
 
 function createRelation() {
@@ -165,7 +197,7 @@ function initializeConnectionPoints() {
     })
   }
 
-  execute(fromSocket, props.excludeFrom);
+  execute(fromSocket.value, props.excludeFrom);
   execute(toSocket, props.excludeTo);
 }
 
@@ -178,17 +210,19 @@ async function initialize() {
   rootRect.width = width;
   rootRect.height = height;
 
-  scene.saveConnection(props.connectKey, {
-    block: block.key,
-    rect: { ... rootRect },
-    socket: toSocket,
-  });
+  if (props.connectKey) {
+    scene.saveConnection(props.connectKey, {
+      block: block.key,
+      rect: { ... rootRect },
+      socket: toSocket,
+    });
+  }
 
-  if (!props.to) return;
-
-  connection = await scene.getConnection(props.to);
-  related.value = true;
-  createRelation();
+  if (props.to) {
+    connection = await scene.getConnection(props.to);
+    related.value = true;
+    createRelation();
+  }
 }
 
 function find(fPoints, tPoints) {
@@ -199,7 +233,8 @@ function find(fPoints, tPoints) {
   const best = {
     from: null,
     to: null,
-    direction: '',
+    fromSocket: '',
+    toSocket: '',
   };
 
   const execute = (fKey) => {
@@ -218,13 +253,14 @@ function find(fPoints, tPoints) {
 
         best.from = fp;
         best.to = tp;
-        best.direction = `${fKey}_${tKey}`
+        best.fromSocket = fKey;
+        best.toSocket = tKey;
       }
     }
   }
 
   for (const key of keys) {
-    if (fromSocket[key] !== true) continue;
+    if (fromSocket.value[key] !== true) continue;
     execute(key)
   }
 
@@ -237,37 +273,44 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.info {
-  position: absolute;
-  left: 0;
-  top: 0;
-  background-color: black;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-}
 .relation-container {
   color: white;
   position: relative;
-  &:before {
-    content: none;
+  &__socket {
     position: absolute;
-    width: 100%;
-    height: 1px;
-    background-color: white;
-    transform: translate(0, -50%);
-    top: 50%;
-  }
-  &:after {
-    content: none;
-    position: absolute;
-    width: 1px;
-    height: 100%;
-    background-color: white;
-    transform: translate(-50%, 0);
-    left: 50%;
+    display: inline-flex;
+    cursor: pointer;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: currentColor;
   }
 }
+
+.socket--active {
+  color: #185BDE;
+}
+
+.socket--left {
+  left: 0;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.socket--right {
+  right: 0;
+  top: 50%;
+  transform: translate(50%, -50%);
+}
+.socket--top {
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -50%);
+}
+.socket--bottom {
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, 50%);
+}
+
 
 </style>

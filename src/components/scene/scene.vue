@@ -26,6 +26,11 @@
             :relation="r.value"
             :color="config.colorArrow"
         />
+        <relation-line
+            v-if="connection"
+            :relation="connection"
+            :color="config.colorArrow"
+        />
       </g>
     </svg>
 
@@ -54,6 +59,17 @@ const config = {
 const blocks = useStorage();
 const connections = useStorage();
 const relations = ref({});
+const connectionTo = ref(null);
+const connectionFrom = ref(null);
+
+const connection = computed(() => {
+  const from = connectionFrom.value;
+  const to = connectionTo.value;
+
+  if (!from || !to) return null;
+
+  return { from, to };
+})
 
 // CAMERA
 const pan = ref({ x: 0, y: 0 });
@@ -327,6 +343,28 @@ async function getConnection(key) {
   return { ...connection, block };
 }
 
+function selectConnectionTarget(e) {
+  if (!connectionFrom.value) return;
+  const { x, y, cx, cy } = connectionFrom.value;
+  const dx = (e.clientX - cx) / scale.value;
+  const dy = (e.clientY - cy) / scale.value;
+
+  connectionTo.value = { x: x + dx, y: y + dy }
+}
+
+function connect() {
+  connectionFrom.value = null;
+  connectionTo.value = null;
+  window.removeEventListener("pointermove", selectConnectionTarget)
+  window.removeEventListener("pointerup", connect)
+}
+
+function startConnection(from) {
+  connectionFrom.value = { ...from.point }
+  window.addEventListener("pointermove", selectConnectionTarget);
+  window.addEventListener("pointerup", connect);
+}
+
 provide('_scene_', {
   scale: computed(() => scale.value),
   offset: computed(() => sceneOffset.value),
@@ -336,6 +374,7 @@ provide('_scene_', {
   createRelation,
   saveConnection,
   getConnection,
+  startConnection,
 })
 
 onMounted(() => {

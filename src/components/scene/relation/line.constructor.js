@@ -20,6 +20,13 @@ export function line(start) {
         return this
     }
 
+    function draw(dx, dy) {
+        if (dx === 0 && dy === 0) return this;
+        const p = last()
+        points.push({ x: p.x + dx, y: p.y + dy })
+        return this
+    }
+
     function build() {
         if (points.length < 2) return ''
 
@@ -64,6 +71,7 @@ export function line(start) {
     return {
         drawX,
         drawY,
+        draw,
         build,
     }
 }
