@@ -21,14 +21,17 @@
       </defs>
       <g :transform="`translate(${pan.x},${pan.y}) scale(${scale})`">
         <relation-line
-            v-for="(r, key) in relations"
-            :key="key"
-            :relation="r.value"
+            v-for="r in relations"
+            :key="r.key"
+            :from-key="r.fromKey"
+            :to-key="r.toKey"
             :color="config.colorArrow"
         />
         <relation-line
-            v-if="connection"
-            :relation="connection"
+            v-if="!!connection.fromKey.value"
+            :from-key="connect.from"
+            :to-key="connect.to"
+            :float="connection.float.value"
             :color="config.colorArrow"
         />
       </g>
@@ -44,6 +47,9 @@
 import { computed, ref, provide, onMounted } from "vue";
 import RelationLine from "@/components/scene/relation/relation-line";
 import { useStorage } from "@/composable";
+import {useConnection} from "@/components/scene/use-connection.composable";
+
+const emits = defineEmits(['create:relation'])
 
 const config = {
   zoom: { max: 1, min: 0.3 },
@@ -55,21 +61,6 @@ const config = {
     { size: 120, zoom: 0.3, color: 'rgba(225,225,225,0.12)' },
   ]
 }
-
-const blocks = useStorage();
-const connections = useStorage();
-const relations = ref({});
-const connectionTo = ref(null);
-const connectionFrom = ref(null);
-
-const connection = computed(() => {
-  const from = connectionFrom.value;
-  const to = connectionTo.value;
-
-  if (!from || !to) return null;
-
-  return { from, to };
-})
 
 // CAMERA
 const pan = ref({ x: 0, y: 0 });
@@ -93,6 +84,18 @@ const fieldSize = ref({
   height: config.expand.height,
 })
 
+const relations = ref({});
+
+const blocks = useStorage();
+const connections = useStorage();
+const connection = useConnection(scale)
+
+const connect = computed(() => {
+  return {
+    from: connection.fromKey.value,
+    to: connection.toKey.value,
+  }
+})
 
 const gridStyle = computed(() => {
   const images = [];
@@ -343,38 +346,28 @@ async function getConnection(key) {
   return { ...connection, block };
 }
 
-function selectConnectionTarget(e) {
-  if (!connectionFrom.value) return;
-  const { x, y, cx, cy } = connectionFrom.value;
-  const dx = (e.clientX - cx) / scale.value;
-  const dy = (e.clientY - cy) / scale.value;
-
-  connectionTo.value = { x: x + dx, y: y + dy }
+async function startConnection(from) {
+  const relation = await connection.start(from);
+  if (!relation) return;
+  createRelation(relation.key, relation);
 }
 
-function connect() {
-  connectionFrom.value = null;
-  connectionTo.value = null;
-  window.removeEventListener("pointermove", selectConnectionTarget)
-  window.removeEventListener("pointerup", connect)
-}
-
-function startConnection(from) {
-  connectionFrom.value = { ...from.point }
-  window.addEventListener("pointermove", selectConnectionTarget);
-  window.addEventListener("pointerup", connect);
+function updateConnection(targetKey) {
+  connection.updateTarget(targetKey)
 }
 
 provide('_scene_', {
   scale: computed(() => scale.value),
   offset: computed(() => sceneOffset.value),
   fieldPos: computed(() => fieldPos.value),
+  connect,
   onDropBlock,
   onMountedBlock,
   createRelation,
   saveConnection,
   getConnection,
   startConnection,
+  updateConnection,
 })
 
 onMounted(() => {

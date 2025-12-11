@@ -1,37 +1,61 @@
+<!--<template>-->
+<!--  <block :block="block" block-key="id">-->
+<!--    <div class="brick">-->
+<!--      <relation-container-->
+<!--          :connect-key="block.id"-->
+<!--          exclude-from-->
+<!--          :exclude-to="['bottom']"-->
+<!--          class="brick__to-connect"-->
+<!--      />-->
+<!--      <relation-container-->
+<!--          v-for="b in block.buttons"-->
+<!--          :connect-key="b.id"-->
+<!--          :to="b.next_block_id"-->
+<!--          :exclude-from="['top']"-->
+<!--          class="brick__from-connect"-->
+<!--      />-->
+<!--      <relation-container-->
+<!--          :exclude-from="['top']"-->
+<!--          class="brick__from-connect"-->
+<!--      />-->
+<!--      <span v-text="block.label" />-->
+<!--    </div>-->
+<!--  </block>-->
+<!--</template>-->
+
 <template>
   <block :block="block" block-key="id">
-    <div class="brick">
-      <relation-container
-          :connect-key="block.id"
-          exclude-from
-          :exclude-to="['bottom']"
-          class="brick__to-connect"
-      />
-      <relation-container
-          v-for="b in block.buttons"
-          :connect-key="b.id"
-          :to="b.next_block_id"
-          :exclude-from="['top']"
-          class="brick__from-connect"
-      />
-      <relation-container
-          :exclude-from="['top']"
-          class="brick__from-connect"
-      />
-      <span v-text="block.label" />
-    </div>
+    <relation-container
+        :connect-key="block.id"
+        :exclude-to="['bottom']"
+        :exclude-from="['top']"
+        :to="relations"
+    >
+      <div class="brick">
+        <span v-text="block.label" />
+      </div>
+    </relation-container>
   </block>
 </template>
 
 <script setup>
 import Block from "@/components/scene/block";
 import RelationContainer from "@/components/scene/relation/relation-container";
+import {computed} from "vue";
 
 const props = defineProps({
   block: {
     type: Object,
     required: true,
   }
+})
+
+const relations = computed(() => {
+  const data = [];
+  (props.block.buttons || []).forEach(b => {
+    data.push(b.next_block_id);
+  })
+  return data;
 })
 </script>
 

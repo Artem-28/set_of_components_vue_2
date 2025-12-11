@@ -1,6 +1,6 @@
 <template>
   <div class="page">
-    <scene>
+    <scene  @create:relation="createRelation">
       <constructor-block
           v-for="b in nodes"
           :key="b.id"
@@ -22,7 +22,7 @@ const nodes = ref([
     x: 600,
     y: 300,
     buttons: [
-      // { id: 'b_a_1',  next_block_id: 'b_b' },
+      { id: 'b_a_1',  next_block_id: 'b_b' },
       // { id: 'b_a_2',  next_block_id: 'b_c' },
       // { id: 'b_a_3',  next_block_id: 'b_d' }
     ]
@@ -33,12 +33,12 @@ const nodes = ref([
     x: 1200,
     y: 500,
   },
-  // {
-  //   id: "b_c",
-  //   label: "C",
-  //   x: -100,
-  //   y: 700,
-  // },
+  {
+    id: "b_c",
+    label: "C",
+    x: -100,
+    y: 700,
+  },
   // {
   //   id: "b_d",
   //   label: "D",
@@ -98,6 +98,26 @@ const blocks = computed(() => {
   // data.push(blockA)
   return data;
 })
+
+
+function createRelation(r) {
+  const idx = nodes.value.findIndex((n) => n.id === r.fromKey);
+  if (idx < 0) return;
+
+  const node = { ...nodes.value[idx] };
+
+  if (!node.buttons) node.buttons = [];
+
+  node.buttons = [...node.buttons]
+
+  node.buttons.push({
+    id: `${r.fromKey}_${node.buttons.length + 1}`,
+    next_block_id: r.toKey,
+  })
+
+  nodes.value.splice(idx, 1, node)
+  console.log(nodes.value);
+}
 </script>
 
 <style scoped lang="scss">
