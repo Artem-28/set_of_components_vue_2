@@ -1,7 +1,6 @@
-import {getCurrentInstance, ref} from "vue";
+import { ref } from "vue";
 
 export const useConnection = (scale) => {
-    const { proxy } = getCurrentInstance();
     let resolveFn = null;
 
     const startData = {

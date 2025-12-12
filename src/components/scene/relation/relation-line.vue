@@ -79,14 +79,16 @@ const position = computed(() => {
 const socketKey = computed(() => {
   const keys = ["left", "top", "right", "bottom"];
 
-  const fPoints = from.points.value.from;
-
-  let minDist = Infinity;
-
   const best = {
     from: null,
     to: null,
   };
+
+  if (!connecting.value && !connected.value) return best;
+
+  const fPoints = from.points.value.from;
+
+  let minDist = Infinity;
 
   const execute = (tKey) => {
     for (const fKey of keys) {
@@ -121,46 +123,6 @@ const socketKey = computed(() => {
 
   return best;
 })
-
-// const socketKey = computed(() => {
-//   const keys = ["left", "top", "right", "bottom"];
-//
-//   const fPoints = from.points.value.from;
-//
-//   let minDist = Infinity;
-//
-//   const best = {
-//     from: null,
-//     to: null,
-//   };
-//
-//   const execute = (fKey) => {watchEffect
-//     for (const tKey of keys) {
-//       if (to.socket.to[tKey] !== true) continue;
-//
-//       const fp = fPoints[fKey];
-//       const tp = tPoints.value[tKey];
-//
-//       const dx = tp.x - fp.x;
-//       const dy = tp.y - fp.y;
-//       const dist = Math.hypot(dx, dy);
-//
-//       if (dist < minDist) {
-//         minDist = dist;
-//
-//         best.from = fKey;
-//         best.to = tKey;
-//       }
-//     }
-//   }
-//
-//   for (const key of keys) {
-//     if (from.socket.from[key] !== true) continue;
-//     execute(key)
-//   }
-//
-//   return best;
-// })
 
 const path = computed(() => {
   const { from: fSocket, to: toSocket } = socketKey.value;
@@ -485,7 +447,16 @@ async function initialize() {
   updateTo();
 }
 
-watch(toConnectKey, updateTo)
 
 initialize();
+
+watch(toConnectKey, updateTo)
+watch(socketKey, () => {
+  if (connecting.value) return;
+
+  const key = `${props.fromKey}_${props.toKey}`
+  const fromSocket = socketKey.value.from;
+  const toSocket = socketKey.value.to;
+  scene.updateRelation(key, { fromSocket, toSocket })
+})
 </script>

@@ -98,13 +98,33 @@ const points = computed(() => {
 })
 
 
+const activeSocket = computed(() => {
+  const active = {
+    left: false,
+    top: false,
+    right: false,
+    bottom: false,
+  }
+
+  const keys = scene.fromRelations.value[props.connectKey] || [];
+
+  const relations = scene.relations.value;
+
+  keys.forEach(key => {
+    const r = relations[key];
+    active[r.fromSocket] = true;
+  })
+
+  return active;
+})
+
 const sockets = computed(() => {
   const data = [];
 
   ['left', 'top', 'right', 'bottom'].forEach(key => {
     const enable = fromSocket.value[key];
     if (!enable) return;
-    const active = false;
+    const active = activeSocket.value[key];
     let css = `relation-container__socket socket--${key}`;
     if (active) css += ' socket--active';
 
@@ -175,6 +195,8 @@ async function initialize() {
       key,
       fromKey: props.connectKey,
       toKey,
+      fromSocket: null,
+      toSocket: null,
     };
     scene.createRelation(key, relation);
   });
@@ -198,6 +220,7 @@ onMounted(() => {
     height: 10px;
     border-radius: 50%;
     background-color: currentColor;
+    z-index: 10;
   }
 }
 

@@ -5,7 +5,6 @@
       @pointerdown="startCamera"
       @wheel="onwheel"
   >
-
     <svg ref="sceneRef" class="base-scene">
       <defs>
         <marker
@@ -28,7 +27,7 @@
             :color="config.colorArrow"
         />
         <relation-line
-            v-if="!!connection.fromKey.value"
+            v-if="!!connect.from"
             :from-key="connect.from"
             :to-key="connect.to"
             :float="connection.float.value"
@@ -85,6 +84,7 @@ const fieldSize = ref({
 })
 
 const relations = ref({});
+const fromRelations = ref({});
 
 const blocks = useStorage();
 const connections = useStorage();
@@ -324,7 +324,22 @@ function centerCamera() {
 }
 
 function createRelation(key, relation) {
-  relations.value[key] = relation;
+  relations.value = {
+    ...relations.value,
+    [key]: relation
+  }
+
+  if (!fromRelations.value[relation.fromKey]) {
+    fromRelations.value = { ...fromRelations, [relation.fromKey]: [] }
+  }
+
+  fromRelations.value[relation.fromKey].push(key);
+}
+
+function updateRelation(key, data = {}) {
+  const relation = relations.value[key];
+  if (!relation) return;
+  relations.value[key] = { ...relation, ...data }
 }
 
 function onDropBlock() {
@@ -360,10 +375,13 @@ provide('_scene_', {
   scale: computed(() => scale.value),
   offset: computed(() => sceneOffset.value),
   fieldPos: computed(() => fieldPos.value),
+  relations: computed(() => relations.value),
+  fromRelations: computed(() => fromRelations.value),
   connect,
   onDropBlock,
   onMountedBlock,
   createRelation,
+  updateRelation,
   saveConnection,
   getConnection,
   startConnection,

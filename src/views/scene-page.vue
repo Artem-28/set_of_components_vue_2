@@ -22,7 +22,7 @@ const nodes = ref([
     x: 600,
     y: 300,
     buttons: [
-      { id: 'b_a_1',  next_block_id: 'b_b' },
+      // { id: 'b_a_1',  next_block_id: 'b_b' },
       // { id: 'b_a_2',  next_block_id: 'b_c' },
       // { id: 'b_a_3',  next_block_id: 'b_d' }
     ]
@@ -33,12 +33,12 @@ const nodes = ref([
     x: 1200,
     y: 500,
   },
-  {
-    id: "b_c",
-    label: "C",
-    x: -100,
-    y: 700,
-  },
+  // {
+  //   id: "b_c",
+  //   label: "C",
+  //   x: -100,
+  //   y: 700,
+  // },
   // {
   //   id: "b_d",
   //   label: "D",
