@@ -5,6 +5,7 @@
           v-for="b in nodes"
           :key="b.id"
           :block="b"
+          @remove:block="removeBlock"
       />
     </scene>
   </div>
@@ -22,7 +23,7 @@ const nodes = ref([
     x: 600,
     y: 300,
     buttons: [
-      // { id: 'b_a_1',  next_block_id: 'b_b' },
+      { id: 'b_a_1',  next_block_id: 'b_b' },
       // { id: 'b_a_2',  next_block_id: 'b_c' },
       // { id: 'b_a_3',  next_block_id: 'b_d' }
     ]
@@ -117,6 +118,12 @@ function createRelation(r) {
 
   nodes.value.splice(idx, 1, node)
   console.log(nodes.value);
+}
+
+function removeBlock(id) {
+  const idx = nodes.value.findIndex((n) => n.id === id);
+  if (idx < 0) return;
+  nodes.value.splice(idx, 1)
 }
 </script>
 

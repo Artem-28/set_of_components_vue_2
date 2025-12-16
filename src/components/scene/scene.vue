@@ -342,6 +342,10 @@ function updateRelation(key, data = {}) {
   relations.value[key] = { ...relation, ...data }
 }
 
+function removeRelation(key) {
+  delete relations.value[key];
+}
+
 function onDropBlock() {
   updateSizeField();
 }
@@ -351,8 +355,17 @@ function onMountedBlock(key, block) {
   updateSizeField();
 }
 
+function onRemoveBlock(key) {
+  blocks.remove(key);
+  updateSizeField();
+}
+
 function saveConnection(key, connection) {
   connections.save(key, connection);
+}
+
+function removeConnection(key) {
+  connections.remove(key);
 }
 
 async function getConnection(key) {
@@ -380,9 +393,12 @@ provide('_scene_', {
   connect,
   onDropBlock,
   onMountedBlock,
+  onRemoveBlock,
   createRelation,
   updateRelation,
+  removeRelation,
   saveConnection,
+  removeConnection,
   getConnection,
   startConnection,
   updateConnection,

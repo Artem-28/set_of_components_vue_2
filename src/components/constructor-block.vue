@@ -32,6 +32,7 @@
         :to="relations"
     >
       <div class="brick">
+        <button @click="removeBlock">remove</button>
         <span v-text="block.label" />
       </div>
     </relation-container>
@@ -50,6 +51,8 @@ const props = defineProps({
   }
 })
 
+const emit = defineEmits(['remove:block'])
+
 const relations = computed(() => {
   const data = [];
   (props.block.buttons || []).forEach(b => {
@@ -57,6 +60,10 @@ const relations = computed(() => {
   })
   return data;
 })
+
+function removeBlock() {
+  emit('remove:block', props.block.id)
+}
 </script>
 
 <style scoped lang="scss">

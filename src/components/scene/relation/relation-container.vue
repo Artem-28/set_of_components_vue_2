@@ -18,7 +18,7 @@
 
 <script setup>
 
-import {computed, inject, onMounted, ref} from "vue";
+import {computed, inject, onMounted, ref, onBeforeUnmount} from "vue";
 
 const props = defineProps({
   connectKey: {
@@ -159,6 +159,11 @@ function leave() {
   scene.updateConnection(null);
 }
 
+function removeRelations() {
+  const fKeys = scene.fromRelations.value[props.connectKey] || [];
+  fKeys.forEach(key => scene.removeRelation(key))
+}
+
 function initializeSockets() {
 
   const execute = (points, exclude) => {
@@ -202,9 +207,16 @@ async function initialize() {
   });
 }
 
-onMounted(() => {
-  initialize();
+onMounted(() => initialize());
+onBeforeUnmount(() => {
+  removeRelations()
+  scene.removeConnection(props.connectKey);
 });
+
+// admin
+// M12EO&KT4ever
+
+
 </script>
 
 <style scoped lang="scss">

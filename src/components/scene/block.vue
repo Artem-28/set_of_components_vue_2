@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-import {ref, computed, onMounted, inject, provide} from 'vue'
+import {ref, computed, onMounted, inject, provide, onBeforeUnmount } from 'vue'
 
 const props = defineProps({
   block: {
@@ -112,6 +112,8 @@ onMounted(() => {
  updateSize();
  scene.onMountedBlock(key, instance);
 })
+
+onBeforeUnmount(() => scene.onRemoveBlock(key))
 </script>
 
 <style scoped lang="scss">
