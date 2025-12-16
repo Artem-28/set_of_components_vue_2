@@ -212,11 +212,6 @@ onBeforeUnmount(() => {
   removeRelations()
   scene.removeConnection(props.connectKey);
 });
-
-// admin
-// M12EO&KT4ever
-
-
 </script>
 
 <style scoped lang="scss">

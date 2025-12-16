@@ -11,7 +11,7 @@
 
 <script setup>
 import { computed, inject, ref, watch } from "vue";
-import { line } from "@/components/scene/relation/line.constructor";
+import { line } from "@/components/scene/private/line.constructor";
 
 const props = defineProps({
   fromKey: {

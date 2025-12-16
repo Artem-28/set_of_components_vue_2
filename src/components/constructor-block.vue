@@ -41,7 +41,7 @@
 
 <script setup>
 import Block from "@/components/scene/block";
-import RelationContainer from "@/components/scene/relation/relation-container";
+import RelationContainer from "@/components/scene/relation-container";
 import {computed} from "vue";
 
 const props = defineProps({

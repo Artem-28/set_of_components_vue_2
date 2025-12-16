@@ -44,9 +44,9 @@
 
 <script setup>
 import { computed, ref, provide, onMounted } from "vue";
-import RelationLine from "@/components/scene/relation/relation-line";
-import { useStorage } from "@/composable";
-import {useConnection} from "@/components/scene/use-connection.composable";
+import RelationLine from "@/components/scene/private/relation-line";
+import {useResizeObserver, useStorage} from "@/composable";
+import {useConnection} from "@/components/scene/private/use-connection.composable";
 
 const emits = defineEmits(['create:relation'])
 
@@ -74,6 +74,8 @@ const stateCamera = {
 const rootRef = ref(null);
 const sceneRef = ref(null);
 const sceneOffset = ref({ x: 0, y: 0 });
+const sceneSize = ref({ width: 0, height: 0 });
+const initialize = ref(false);
 const scale = ref(1);
 
 
@@ -402,6 +404,17 @@ provide('_scene_', {
   getConnection,
   startConnection,
   updateConnection,
+})
+
+useResizeObserver(rootRef, (size) => {
+  const { x, y } = sceneRef.value.getBoundingClientRect();
+  sceneOffset.value = { x, y };
+  sceneSize.value = size;
+
+  if (!initialize.value) {
+    centerCamera()
+    initialize.value = true;
+  }
 })
 
 onMounted(() => {
